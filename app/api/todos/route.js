@@ -34,8 +34,10 @@ export async function POST(request) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            userId, title, completed: false
-        })
+            title,
+            body,
+            userId,
+          }),
     })
 
     const newTodo = await res.json();

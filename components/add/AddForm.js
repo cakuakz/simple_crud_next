@@ -1,13 +1,14 @@
-"use-client";
+"use client";
 import React from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation"
 import { POST } from "@/app/api/todos/route";
 
 const AddForm = () => {
 
     const router = useRouter();
+    const [userid, setUserid] = React.useState("");
     const [title, setTitle] = React.useState("");
-    const [errors, setErrors] = useState({ title: "", form: "" });
+    const [errors, setErrors] = React.useState({ title: "", form: "" });
 
     const validateInput = (input, rule) => {
         // TODO: Validate input based on rule
@@ -16,26 +17,26 @@ const AddForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const titleError = validateInput(title, "title");
-    
-        if (titleError) {
-          setErrors({ ...errors, title: titleError, form: "" });
+        const idError = validateInput(userid, "id")
+
+        if (titleError || idError) {
+          setErrors({ ...errors, title: titleError, userid: idError, form: "" });
         } else {
-          setErrors({ title: "", form: "" });
-          setIsLoading(true);
+          setErrors({ title: "", userid: "", form: "" });
     
           try {
             const newTodos = {
-              userId: 1,
+              userid,
               title,
             };
     
-            await POST(newTodos)
+            await POST(newTodos);
             // Clear the form after successful submission
+            setUserid("");
             setTitle("");
-            router.push("/");
+            router.push("/add");
           } catch (error) {
             setErrors({ ...errors, form: error.message });
-            setIsLoading(false);
           }
         }
       };
@@ -44,6 +45,22 @@ const AddForm = () => {
         <div className="container mx-auto w-full sm:w-1/2">
             <h2 className="text-3xl font-bold mb-4">Add Post</h2>
             <form onSubmit={handleSubmit} noValidate>
+                <div className="my-4">
+                  <label htmlFor="userId" className="block font-medium text-gray-700">
+                    id
+                  </label>
+                  <input
+                    type="text"
+                    id="userid"
+                    className={`w-full px-3 py-2 mt-1 text-gray-700 border-2 rounded-lg focus:outline-none ${
+                    errors.title ? "border-red-500" : "border-gray-300"
+                    }`}
+                    value={userid}
+                    onChange={(e) => setUserid(e.target.value)}
+                    required />
+                </div>
+                {errors.userid && <p className="text-red-500 text-sm">{errors.userid}</p>}
+
                 {/* Title Input */}
                 <div className="mb-4">
                     <label htmlFor="title" className="block font-medium text-gray-700">
@@ -62,24 +79,6 @@ const AddForm = () => {
                     {errors.title && (
                         <p className="text-red-500 text-sm">{errors.title}</p>
                     )}
-                </div>
-
-                {/* Body Input */}
-                <div className="mb-4">
-                <label htmlFor="body" className="block font-medium text-gray-700">
-                    Body
-                </label>
-                <textarea
-                    id="body"
-                    rows="4"
-                    className={`w-full px-3 py-2 mt-1 text-gray-700 border-2 rounded-lg focus:outline-none ${
-                    errors.body ? "border-red-500" : "border-gray-300"
-                    }`}
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    required
-                />
-                    {errors.body && <p className="text-red-500 text-sm">{errors.body}</p>}
                 </div>
 
                 {/* Form Error */}
